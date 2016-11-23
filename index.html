@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>The Dash - Job Tracking</title>
+    <link href="https://v4-alpha.getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://v4-alpha.getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet">
+    <link href="node_modules/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+
+  <body ng-app="myApp">
+
+    <nav class="navbar navbar-dark navbar-fixed-top bg-inverse">
+      <button type="button" class="navbar-toggler hidden-sm-up" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation"></button>
+      <a class="navbar-brand" href="#">The Dash</a>
+      <div id="navbar">
+        <nav class="nav navbar-nav float-xs-right">
+          <a class="nav-item nav-link" data-toggle="modal" data-target=".bd-example-modal-lg">About</a>
+        </nav>
+      </div>
+    </nav>
+
+    <div class="container-fluid" ng-controller="ProductsCtrl">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="#" data-toggle="tooltip" title="Export results to Excel file" data-placement="right" id="btnExport" onclick="exportToExcel();">Reports</a></li>
+            <li><a href="" class="" ng-click="showForm()" ng-hide="addFormShow">Add Job +</a></li>
+            <li><a href="" class="" ng-click="hideForm()" ng-show="addFormShow">Hide</a></li>
+          </ul>
+          <form class="form-group">
+            <input type="text" class="form-control" ng-model="search" placeholder="Search"></input>
+          </form>
+        </div>
+        <div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+          <strong>Total results: {{products.length}}</strong>
+          <iframe id="txtArea1" style="display:none"></iframe>
+          <div class="messages"></div>
+          <form id="form" class="form-inline add-form" ng-submit="addFormSubmit()" ng-show="addFormShow">
+            <div class="form-inline">
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="company" placeholder="Company" required>
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="role" placeholder="Role" required>
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="notes" placeholder="Notes" required>
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="recruiter" placeholder="Recruiter" required>
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="History" placeholder="Messages History" data-toggle="tooltip" title="Link to GMail message history" data-placement="top">
+              <input class="form-control"  ng-form="addJob" type="text" ng-model="details" placeholder="Link to details" data-toggle="tooltip" title="Link to page with job details" data-placement="top">
+              <input class="form-control"  ng-disabled="!addJob.$valid" type="submit" value="Add Job" class="btn btn-default btn-success">
+            </div>
+          </form>
+          <form class="form-inline edit-form" ng-submit="editFormSubmit()" ng-show="editFormShow">
+            <input class="form-control"  type="text" ng-model="company" placeholder="Company" required>
+            <input class="form-control"  type="text" ng-model="role" placeholder="Role" required>
+            <input class="form-control"  type="text" ng-model="notes" placeholder="Notes" required>
+            <input class="form-control"  type="text" ng-model="recruiter" placeholder="Recruiter">
+            <input class="form-control"  type="text" ng-model="History" placeholder="Message History">
+            <input class="form-control"  type="text" ng-model="details" placeholder="Link to details">
+            <input class="form-control"  type="submit" value="Edit Job" class="btn btn-default btn-warning">
+          </form>
+          <div class="table-responsive">
+            <table class="table table-striped" id="tabledata">
+              <thead>
+                <tr>
+                  <th><a href="" ng-click="orderByField='company'; reverseSort = !reverseSort">Company</a></th>
+                  <th>Role</th>
+                  <th>Notes</th>
+                  <th>Recruiter</th>
+                  <th>History</th>
+                  <th><a href="" ng-click="orderByField='added'; reverseSort = !reverseSort">Added</a></th>
+                  <th>Modified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="product in products | filter: search | orderBy:orderByField:reverseSort">
+                  <td>{{product.company}}</td>
+                  <td><a href="{{product.details}}">{{product.role}}</a></td>
+                  <td>{{product.notes}}</td>
+                  <td>{{product.recruiter}}</td>
+                  <td><a href="{{product.History}}" target="_blank" ng-show="product.History != null">View</a></td>
+                  <td>{{product.date | date: 'shortDate'}}</td>
+                  <td>{{product.modify | date: 'shortDate'}}</td>
+                  <td>
+                      <i class="fa fa-pencil" aria-hidden="true" ng-click="showProduct(product)"></i>
+                      <i class="fa fa-trash-o" aria-hidden="true" ng-click="deleteProduct(product)"></i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+      The Dash is a job management app, built with AngularJS + Firebase + SASS. The app has the following features:<br>
+      <ul>
+        <li>Full search</li>
+        <li>Ability to export all results to Excel file</li>
+      </ul>
+    </div>
+    </div>
+  </div>
+</div>
+
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="node_modules/angular/angular.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/excelExport.js"></script>
+    <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/angularfire/1.2.0/angularfire.min.js"></script>
+  </body>
+</html>
